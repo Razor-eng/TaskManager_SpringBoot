@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -47,14 +48,14 @@ public class AuthController {
     public ResponseEntity<?> createAuthenticationToken(@RequestBody User user) throws Exception {
         try {
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword())
-            );
+                    new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
         } catch (Exception e) {
             throw new Exception("Incorrect username or password", e);
         }
 
         final UserDetails userDetails = userRepository.findByUsername(user.getUsername())
-                .map(u -> new org.springframework.security.core.userdetails.User(u.getUsername(), u.getPassword(), new ArrayList<>()))
+                .map(u -> new org.springframework.security.core.userdetails.User(u.getUsername(), u.getPassword(),
+                        new ArrayList<>()))
                 .orElseThrow(() -> new Exception("User not found"));
 
         final String jwt = jwtUtil.generateToken(userDetails);
@@ -64,4 +65,3 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 }
-
